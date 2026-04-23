@@ -47,4 +47,8 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<finalName>prj05</finalName>
+	</build>
+
 </project>

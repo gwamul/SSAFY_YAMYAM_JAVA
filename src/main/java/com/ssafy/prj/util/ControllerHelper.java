@@ -26,6 +26,12 @@ public interface ControllerHelper {
 		System.out.println("action: " + action);
 		return action;
 	}
+	
+	default String getAction(HttpServletRequest req, String defaultAction) {
+        String action = req.getParameter("action");
+        return (action == null || action.isBlank()) ? defaultAction : action;
+    }
+	
 
 	// TODO: 01. redirect와 forward를 처리할 수 있는 utility method로 redirect, forward를
 	// 작성하세요.
@@ -55,7 +61,10 @@ public interface ControllerHelper {
 		
 		response.addCookie(cookie);
 	}
-	
+	default void writeJson(HttpServletResponse res, String json) throws IOException {
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write(json);
+    }
 	
 	// END
 }

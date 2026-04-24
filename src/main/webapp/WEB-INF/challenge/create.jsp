@@ -17,22 +17,29 @@
     .tab-btn.active, .tab-btn:hover { background: #3d5220; color: #fff; }
     .card-section { background:#fff; border-radius:14px; padding:24px;
                     box-shadow:0 2px 10px rgba(0,0,0,.07); margin-bottom:24px; }
+    .template-section h6 { font-weight:800; color:#3d5220; margin-bottom:12px; font-size:14px; }
+    .template-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .tpl-btn { border:2px solid #e8e8e0; border-radius:12px; padding:14px 10px;
+               background:#fff; cursor:pointer; text-align:center; transition:all .2s;
+               font-size:13px; font-weight:700; color:#444; }
+    .tpl-btn:hover { border-color:#3d5220; background:#f0f5e8; color:#3d5220; }
+    .tpl-btn .tpl-icon { font-size:24px; display:block; margin-bottom:6px; }
+    .tpl-btn .tpl-kcal { font-size:11px; color:#888; font-weight:400; margin-top:4px; }
     .stats-dashboard { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
     .stat-box { background:#3d5220; color:#fff; border-radius:12px; padding:16px; text-align:center; }
     .stat-box .val { font-size:24px; font-weight:900; }
     .stat-box .lbl { font-size:11px; opacity:.8; margin-top:2px; }
-    .day-block { border:1px solid #e8e8e0; border-radius:12px; padding:16px; margin-bottom:16px;
-                 background:#fafafa; }
+    .day-block { border:1px solid #e8e8e0; border-radius:12px; padding:16px; margin-bottom:16px; background:#fafafa; }
     .day-label { font-weight:800; color:#3d5220; margin-bottom:12px; font-size:14px; }
-    .meal-section label { font-size:12px; font-weight:700; color:#555; }
+    .meal-section label { font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:4px; }
     .meal-row { display:flex; gap:6px; margin-bottom:6px; position:relative; }
     .meal-row input[type=text]   { flex:1; }
     .meal-row input[type=number] { width:80px; }
     .autocomplete-box { position:absolute; top:100%; left:0; right:80px; background:#fff;
-                        border:1px solid #ddd; border-radius:8px; z-index:500;
-                        box-shadow:0 4px 12px rgba(0,0,0,.12); max-height:220px; overflow-y:auto; }
+                        border:1px solid #ddd; border-radius:8px; z-index:9999;
+                        box-shadow:0 4px 12px rgba(0,0,0,.15); max-height:220px; overflow-y:auto; }
     .ac-item { padding:8px 12px; cursor:pointer; font-size:13px; display:flex;
-               justify-content:space-between; border-bottom:1px solid #f5f5f0; }
+               justify-content:space-between; border-bottom:1px solid #f5f5f0; user-select:none; }
     .ac-item:hover { background:#f0f5e8; }
     .ac-item .kcal { color:#3d5220; font-weight:700; }
     .feedback { display:none; margin-top:8px; }
@@ -50,7 +57,6 @@
     <a href="${root}/challenge?action=createForm" class="tab-btn active">챌린지 만들기</a>
   </div>
 
-  <%-- 실시간 통계 대시보드 --%>
   <div class="stats-dashboard">
     <div class="stat-box"><div class="val" id="totalKcal">0</div><div class="lbl">총 칼로리 (kcal)</div></div>
     <div class="stat-box"><div class="val" id="avgKcal">0</div><div class="lbl">일평균 칼로리</div></div>
@@ -58,10 +64,10 @@
   </div>
   <div id="statsFeedback" class="alert feedback"></div>
 
-  <form method="post" action="${root}/challenge" id="createForm">
+  <form method="post" action="${root}/challenge" id="createForm"
+        onkeydown="if(event.key==='Enter'&&event.target.tagName!=='TEXTAREA'){event.preventDefault();}">
     <input type="hidden" name="action" value="create">
 
-    <%-- 기본 정보 --%>
     <div class="card-section">
       <h5 class="fw-bold mb-3">기본 정보</h5>
       <div class="row g-3">
@@ -94,7 +100,29 @@
       </div>
     </div>
 
-    <%-- 일별 식단 입력 (JS로 동적 생성) --%>
+    <div class="card-section template-section">
+      <h6>⚡ 빠른 식단 템플릿 적용</h6>
+      <p class="text-muted small mb-3">기간을 먼저 선택한 뒤 버튼을 클릭하면 식단이 자동으로 채워집니다.</p>
+      <div class="template-grid">
+        <button type="button" class="tpl-btn" onclick="applyTemplate('diet')">
+          <span class="tpl-icon">🥗</span>다이어트
+          <div class="tpl-kcal">1,400 kcal/일</div>
+        </button>
+        <button type="button" class="tpl-btn" onclick="applyTemplate('bulk')">
+          <span class="tpl-icon">💪</span>벌크업
+          <div class="tpl-kcal">3,000 kcal/일</div>
+        </button>
+        <button type="button" class="tpl-btn" onclick="applyTemplate('healthy')">
+          <span class="tpl-icon">🌿</span>건강 유지
+          <div class="tpl-kcal">2,000 kcal/일</div>
+        </button>
+        <button type="button" class="tpl-btn" onclick="applyTemplate('athlete')">
+          <span class="tpl-icon">🏃</span>운동 퍼포먼스
+          <div class="tpl-kcal">2,500 kcal/일</div>
+        </button>
+      </div>
+    </div>
+
     <div id="mealPlanContainer"></div>
 
     <button type="submit" class="btn-create">✅ 챌린지 생성</button>
@@ -102,124 +130,229 @@
 </div>
 
 <script>
-const ROOT = '${root}';
+var ROOT = '${root}';
 
-/* ─── 기간 선택 시 일별 입력 생성 ─────────────────────────────── */
+/* ── 템플릿 데이터 ── */
+var TEMPLATES = {
+  diet: {
+    targetCalories: 1400,
+    B: [{name:'현미밥', kcal:150}, {name:'두부된장국', kcal:80}, {name:'계란찜', kcal:70}],
+    L: [{name:'닭가슴살', kcal:165}, {name:'샐러드', kcal:60}, {name:'고구마', kcal:110}],
+    D: [{name:'현미밥', kcal:150}, {name:'나물무침', kcal:50}, {name:'미역국', kcal:30}]
+  },
+  bulk: {
+    targetCalories: 3000,
+    B: [{name:'흰쌀밥', kcal:300}, {name:'소고기미역국', kcal:120}, {name:'계란후라이', kcal:180}, {name:'우유', kcal:130}],
+    L: [{name:'돼지불고기', kcal:350}, {name:'흰쌀밥', kcal:300}, {name:'된장찌개', kcal:100}, {name:'시금치무침', kcal:40}],
+    D: [{name:'연어구이', kcal:280}, {name:'흰쌀밥', kcal:300}, {name:'계란탕', kcal:100}, {name:'바나나', kcal:90}]
+  },
+  healthy: {
+    targetCalories: 2000,
+    B: [{name:'오트밀', kcal:150}, {name:'블루베리', kcal:50}, {name:'아몬드밀크', kcal:60}],
+    L: [{name:'잡곡밥', kcal:220}, {name:'두부조림', kcal:130}, {name:'콩나물국', kcal:40}, {name:'김치', kcal:20}],
+    D: [{name:'닭가슴살', kcal:165}, {name:'현미밥', kcal:150}, {name:'브로콜리', kcal:55}, {name:'토마토', kcal:35}]
+  },
+  athlete: {
+    targetCalories: 2500,
+    B: [{name:'통밀빵', kcal:200}, {name:'계란프라이', kcal:180}, {name:'오렌지주스', kcal:110}],
+    L: [{name:'닭가슴살덮밥', kcal:450}, {name:'된장국', kcal:60}, {name:'사과', kcal:80}],
+    D: [{name:'연어스테이크', kcal:300}, {name:'고구마', kcal:110}, {name:'그릭요거트', kcal:100}, {name:'견과류', kcal:180}]
+  }
+};
+
+/* ── 템플릿 적용 ── */
+function applyTemplate(key) {
+  var days = parseInt(document.getElementById('durationSelect').value) || 0;
+  if (days === 0) { alert('먼저 기간을 선택해주세요.'); return; }
+  var tpl = TEMPLATES[key];
+  document.getElementById('targetCalories').value = tpl.targetCalories;
+  if (document.querySelectorAll('.day-block').length !== days) {
+    generateDayBlocks(days);
+  }
+  for (var d = 1; d <= days; d++) {
+    ['B','L','D'].forEach(function(meal) {
+      var items = tpl[meal];
+      items.forEach(function(item, idx) {
+        var slot = idx + 1;
+        var fi = document.querySelector('[name="food_d' + d + '_' + meal + '_' + slot + '"]');
+        var ki = document.querySelector('[name="kcal_d' + d + '_' + meal + '_' + slot + '"]');
+        if (fi) fi.value = item.name;
+        if (ki) ki.value = item.kcal;
+      });
+    });
+  }
+  updateStats();
+}
+
+/* ── 기간 변경 ── */
 document.getElementById('durationSelect').addEventListener('change', function() {
-  const days = parseInt(this.value) || 0;
-  generateDayBlocks(days);
+  generateDayBlocks(parseInt(this.value) || 0);
   updateStats();
 });
-
 document.getElementById('targetCalories').addEventListener('input', updateStats);
 
+/* ── 블록 생성 (DOM API 사용 — JSP EL 충돌 없음) ── */
 function generateDayBlocks(days) {
-  const container = document.getElementById('mealPlanContainer');
+  var container = document.getElementById('mealPlanContainer');
   container.innerHTML = '';
-  for (let d = 1; d <= days; d++) {
-    container.insertAdjacentHTML('beforeend', dayBlockHtml(d));
+  for (var d = 1; d <= days; d++) {
+    var block = buildDayBlock(d);
+    container.appendChild(block);
+    block.querySelectorAll('.food-input').forEach(attachAutocomplete);
+    block.querySelectorAll('.kcal-input').forEach(function(inp) {
+      inp.addEventListener('input', updateStats);
+    });
   }
-  // 자동완성 이벤트 연결
-  container.querySelectorAll('.food-input').forEach(attachAutocomplete);
-  container.querySelectorAll('.kcal-input').forEach(inp => {
-    inp.addEventListener('input', updateStats);
-  });
 }
 
-function dayBlockHtml(d) {
-	  const meals = [['B','아침'],['L','점심'],['D','저녁']];
-	  const cols = meals.map(([m, label]) => `
-	    <div class="col-md-4">
-	      <div class="meal-section">
-	        <label>\${label}</label>
-	        \${[1,2,3,4].map(s => `
-	          <div class="meal-row">
-	            <input type="text" class="form-control form-control-sm food-input"
-	                   name="food_d\${d}_\${m}_\${s}" placeholder="메뉴 \${s}"
-	                   data-day="\${d}" data-meal="\${m}" data-slot="\${s}" autocomplete="off">
-	            <input type="number" class="form-control form-control-sm kcal-input"
-	                   name="kcal_d\${d}_\${m}_\${s}" placeholder="kcal"
-	                   data-day="\${d}" data-meal="\${m}" data-slot="\${s}" min="0">
-	          </div>`).join('')}
-	      </div>
-	    </div>`).join('');
+function buildDayBlock(d) {
+  var wrap = document.createElement('div');
+  wrap.className = 'day-block';
 
-	  const total = `<span class="small text-muted ms-2">합계: <strong id="day\${d}Total">0</strong> kcal</span>`;
+  var header = document.createElement('div');
+  header.className = 'day-label';
+  header.innerHTML = '🗓️ ' + d + '일차'
+    + ' <span class="small text-muted ms-2">합계: <strong id="day' + d + 'Total">0</strong> kcal</span>';
+  wrap.appendChild(header);
 
-	  return `
-	    <div class="day-block">
-	      <div class="day-label">🗓️ \${d}일차 \${total}</div>
-	      <div class="row g-3">\${cols}</div>
-	    </div>`;
-	}
+  var row = document.createElement('div');
+  row.className = 'row g-3';
 
-/* ─── 음식 자동완성 ─────────────────────────────────────────────── */
+  [['B','아침'],['L','점심'],['D','저녁']].forEach(function(pair) {
+    var m = pair[0], label = pair[1];
+    var col = document.createElement('div');
+    col.className = 'col-md-4';
+
+    var section = document.createElement('div');
+    section.className = 'meal-section';
+
+    var lbl = document.createElement('label');
+    lbl.textContent = label;
+    section.appendChild(lbl);
+
+    for (var s = 1; s <= 4; s++) {
+      var mealRow = document.createElement('div');
+      mealRow.className = 'meal-row';
+
+      var fi = document.createElement('input');
+      fi.type = 'text';
+      fi.className = 'form-control form-control-sm food-input';
+      fi.name = 'food_d' + d + '_' + m + '_' + s;
+      fi.placeholder = '메뉴 ' + s;
+      fi.dataset.day  = String(d);
+      fi.dataset.meal = m;
+      fi.dataset.slot = String(s);
+      fi.autocomplete = 'off';
+
+      var ki = document.createElement('input');
+      ki.type = 'number';
+      ki.className = 'form-control form-control-sm kcal-input';
+      ki.name = 'kcal_d' + d + '_' + m + '_' + s;
+      ki.placeholder = 'kcal';
+      ki.dataset.day  = String(d);
+      ki.dataset.meal = m;
+      ki.dataset.slot = String(s);
+      ki.min = '0';
+
+      mealRow.appendChild(fi);
+      mealRow.appendChild(ki);
+      section.appendChild(mealRow);
+    }
+
+    col.appendChild(section);
+    row.appendChild(col);
+  });
+
+  wrap.appendChild(row);
+  return wrap;
+}
+
+/* ── 자동완성 ── */
 function attachAutocomplete(input) {
-  let box = null;
-  input.addEventListener('input', async function() {
-    const q = this.value.trim();
-    removeBox();
+  var box = null;
+  var selecting = false;
+
+  input.addEventListener('input', function() {
+    var q = input.value.trim();
+    closeBox();
     if (q.length < 1) return;
 
-    const res = await fetch(`\${ROOT}/challenge?action=foodSearch&q=\${encodeURIComponent(q)}`);
-    const foods = await res.json();
-    if (!foods.length) return;
+    fetch(ROOT + '/challenge?action=foodSearch&q=' + encodeURIComponent(q))
+      .then(function(res) { return res.json(); })
+      .then(function(foods) {
+        if (!foods.length) return;
+        box = document.createElement('div');
+        box.className = 'autocomplete-box';
 
-    box = document.createElement('div');
-    box.className = 'autocomplete-box';
-    foods.forEach(f => {
-      const item = document.createElement('div');
-      item.className = 'ac-item';
-      item.innerHTML = `<span>\${f.foodName}</span><span class="kcal">\${Math.round(f.energy)}kcal</span>`;
-      item.addEventListener('mousedown', e => {
-        e.preventDefault();
-        input.value = f.foodName;
-        // 같은 행의 kcal 입력란에 값 채우기
-        const { day, meal, slot } = input.dataset;
-        const kcalInput = document.querySelector(
-        		`.kcal-input[data-day="\${day}"][data-meal="\${meal}"][data-slot="\${slot}"]`
-        if (kcalInput) { kcalInput.value = Math.round(f.energy); }
-        removeBox();
-        updateStats();
-      });
-      box.appendChild(item);
-    });
+        foods.forEach(function(f) {
+          var item = document.createElement('div');
+          item.className = 'ac-item';
+          item.innerHTML = '<span>' + f.foodName + '</span>'
+            + '<span class="kcal">' + Math.round(f.energy) + 'kcal</span>';
 
-    input.parentElement.style.position = 'relative';
-    input.parentElement.appendChild(box);
+          item.addEventListener('pointerdown', function(e) {
+            e.preventDefault();
+            selecting = true;
+            input.value = f.foodName;
+            var ki = document.querySelector(
+              '[name="kcal_d' + input.dataset.day + '_' + input.dataset.meal + '_' + input.dataset.slot + '"]'
+            );
+            if (ki) ki.value = Math.round(f.energy);
+            closeBox();
+            selecting = false;
+            updateStats();
+            // 다음 슬롯으로 포커스
+            var nextSlot = parseInt(input.dataset.slot) + 1;
+            var next = document.querySelector(
+              '[name="food_d' + input.dataset.day + '_' + input.dataset.meal + '_' + nextSlot + '"]'
+            );
+            if (next) next.focus();
+          });
+
+          box.appendChild(item);
+        });
+
+        input.parentElement.appendChild(box);
+      })
+      .catch(function() {});
   });
 
-  input.addEventListener('blur', () => setTimeout(removeBox, 150));
-  function removeBox() { if (box) { box.remove(); box = null; } }
+  input.addEventListener('blur', function() {
+    if (!selecting) setTimeout(closeBox, 120);
+  });
+
+  function closeBox() {
+    if (box) { box.remove(); box = null; }
+  }
 }
 
-/* ─── 실시간 통계 계산 ──────────────────────────────────────────── */
+/* ── 실시간 통계 ── */
 function updateStats() {
-  const target = parseInt(document.getElementById('targetCalories').value) || 0;
-  const dayBlocks = document.querySelectorAll('.day-block');
-  let totalKcal = 0, activeDays = 0;
+  var target = parseInt(document.getElementById('targetCalories').value) || 0;
+  var dayBlocks = document.querySelectorAll('.day-block');
+  var totalKcal = 0, activeDays = 0;
 
-  dayBlocks.forEach((block, i) => {
-    let daySum = 0;
-    block.querySelectorAll('.kcal-input').forEach(inp => {
+  dayBlocks.forEach(function(block, i) {
+    var daySum = 0;
+    block.querySelectorAll('.kcal-input').forEach(function(inp) {
       daySum += parseFloat(inp.value) || 0;
     });
-    const el = document.getElementById(`day\${i+1}Total`);
+    var el = document.getElementById('day' + (i+1) + 'Total');
     if (el) el.textContent = Math.round(daySum);
     if (daySum > 0) { totalKcal += daySum; activeDays++; }
   });
 
-  const avg = activeDays > 0 ? Math.round(totalKcal / activeDays) : 0;
+  var avg = activeDays > 0 ? Math.round(totalKcal / activeDays) : 0;
   document.getElementById('totalKcal').textContent   = Math.round(totalKcal).toLocaleString();
   document.getElementById('avgKcal').textContent     = avg.toLocaleString();
   document.getElementById('achieveRate').textContent = target > 0
     ? Math.round((avg / target) * 100) + '%' : '0%';
 
-  const fb = document.getElementById('statsFeedback');
+  var fb = document.getElementById('statsFeedback');
   if (target > 0 && avg > 0) {
-    const rate = (avg / target) * 100;
+    var rate = (avg / target) * 100;
     fb.style.display = 'block';
-    fb.className = `alert feedback alert-\${rate >= 100 ? 'success' : rate >= 70 ? 'info' : 'warning'}`;
+    fb.className = 'alert feedback alert-' + (rate >= 100 ? 'success' : rate >= 70 ? 'info' : 'warning');
     fb.textContent = rate >= 100 ? '🎉 목표 달성!' : rate >= 70 ? '👍 거의 다 왔어요!' : '💪 조금 더 채워보세요!';
   } else {
     fb.style.display = 'none';

@@ -31,10 +31,7 @@ public class ChallengeController extends HttpServlet implements ControllerHelper
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// /board -> list
-		// /board?action=list
-		// /board?action=writeForm
-		// /board?action=write
+
 		request.setCharacterEncoding("UTF-8");
 		String action = getActionParameter(request, response, "list");
 		switch (action) {
@@ -57,24 +54,28 @@ public class ChallengeController extends HttpServlet implements ControllerHelper
 			throws ServletException, IOException {
 		req.setCharacterEncoding("UTF-8");
 
-		 String action = getActionParameter(req, res, "list");  // ← 여기 수정
-		    switch (action) {
-		    case "create"    -> create(req, res);
-		    case "subscribe" -> subscribe(req, res);
-		    default          -> doGet(req, res);
-		    }
+		String action = getActionParameter(req, res, "list");
+		switch (action) {
+		case "create"    -> create(req, res);
+		case "subscribe" -> subscribe(req, res);
+		default          -> doGet(req, res);
+		}
 	}
 
-	// ── 핸들러 ───────────────────────────────────────────────────────
-
-	/** 챌린지 탐색 목록 */
+	/*
+	 * 현재 가지고 있는 challenge 리스트 보여줌.
+	 */
 	private void list(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
+		
 		String difficulty = req.getParameter("difficulty");
 		String durationStr = req.getParameter("duration");
 		Integer duration = null;
-		try { if (durationStr != null) duration = Integer.parseInt(durationStr); }
-		catch (NumberFormatException ignored) {}
+		try { 
+			if (durationStr != null) duration = Integer.parseInt(durationStr); 
+		}catch (NumberFormatException ignored) {
+			ignored.printStackTrace();
+		}
 
 		List<ChallengeDto> challenges = challengeService.getFilteredChallenges(difficulty, duration);
 		req.setAttribute("challenges", challenges);
@@ -90,7 +91,9 @@ public class ChallengeController extends HttpServlet implements ControllerHelper
 		forward(req, res, "/WEB-INF/challenge/list.jsp");
 	}
 
-	/** 챌린지 상세 */
+	/*
+	 * 특정 챌린지 상세 출력 
+	 */
 	private void detail(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
 		int id = parseInt(req.getParameter("id"), -1);
@@ -103,7 +106,9 @@ public class ChallengeController extends HttpServlet implements ControllerHelper
 		forward(req, res, "/WEB-INF/challenge/detail.jsp");
 	}
 
-	/** 내 챌린지 목록 (세션 기반) */
+	/*
+	 * 내 챌린지 목록
+	 */
 	@SuppressWarnings("unchecked")
 	private void myList(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
@@ -238,8 +243,7 @@ public class ChallengeController extends HttpServlet implements ControllerHelper
 		return items;
 	}
 
-	// ── 유틸 ────────────────────────────────────────────────────────
-
+	
 	private int parseInt(String s, int defaultVal) {
 		try { return Integer.parseInt(s); } catch (Exception e) { return defaultVal; }
 	}

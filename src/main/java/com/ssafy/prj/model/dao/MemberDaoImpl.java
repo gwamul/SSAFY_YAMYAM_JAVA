@@ -7,13 +7,16 @@ import com.ssafy.prj.model.dto.MemberDto;
 
 public class MemberDaoImpl implements MemberDao {
 
-	private List<MemberDto> members = new ArrayList<>();
+	private static List<MemberDto> members = new ArrayList<>();
+	
+	static {
+		// 초기 데이터 추가: id, password, name, birthDate, gender, height, weight, disease, image
+		members.add(new MemberDto("admin", "1234", "관리자", "1990-01-01", "male", 180, 75, "없음", null));
+		members.add(new MemberDto("ssafy", "1234", "싸피", "1995-05-05", "female", 165, 55, "없음", null));
+	}
 	
 	private static MemberDao instance;
 	private MemberDaoImpl() {
-		// 바뀐 생성자에 맞춰 초기 데이터 추가: id, password, name, birthDate, gender, height, weight, disease, image
-		members.add(new MemberDto("admin", "1234", "관리자", "1990-01-01", "male", 180, 75, "없음", null));
-		members.add(new MemberDto("ssafy", "1234", "싸피", "1995-05-05", "female", 165, 55, "없음", null));
 	}
 	public static MemberDao getInstance() {
 		if (instance == null) {
@@ -85,16 +88,30 @@ public class MemberDaoImpl implements MemberDao {
 	@Override
 	public void addFollower(String myId, String targetId) {
 		MemberDto me = selectMember(myId);
-		if (me != null && !me.getFollowers().contains(targetId)) {
-			me.getFollowers().add(targetId);
+		MemberDto target = selectMember(targetId);
+		
+		if (me != null && target != null) {
+			// 내가 팔로우하는 사람 목록에 타겟 추가
+			if (!me.getFollowing().contains(targetId)) {
+				me.getFollowing().add(targetId);
+			}
+			// 타겟의 팔로워 목록에 나를 추가
+			if (!target.getFollowers().contains(myId)) {
+				target.getFollowers().add(myId);
+			}
 		}
 	}
 
 	@Override
 	public void removeFollower(String myId, String targetId) {
 		MemberDto me = selectMember(myId);
-		if (me != null) {
-			me.getFollowers().remove(targetId);
+		MemberDto target = selectMember(targetId);
+		
+		if (me != null && target != null) {
+			// 내 팔로잉 목록에서 타겟 제거
+			me.getFollowing().remove(targetId);
+			// 타겟의 팔로워 목록에서 나를 제거
+			target.getFollowers().remove(myId);
 		}
 	}
 

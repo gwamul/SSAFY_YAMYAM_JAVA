@@ -90,7 +90,7 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		MemberDto member = new MemberDto(id, password, name, birthDate, gender, height, weight, disease, null);
 		memberService.modifyMember(member);
 		
-		// 세션 정보 갱신
+		// 세션 정보 갱신 (중요: 세션 유지 및 최신 데이터 보장)
 		HttpSession session = request.getSession();
 		session.setAttribute("loginUser", memberService.getMember(id));
 		
@@ -112,8 +112,10 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		HttpSession session = request.getSession();
 		MemberDto loginUser = (MemberDto) session.getAttribute("loginUser");
 		
-		if (loginUser != null && targetId != null) {
+		if (loginUser != null && targetId != null && !loginUser.getId().equals(targetId)) {
 			memberService.addFollower(loginUser.getId(), targetId);
+			// 내 세션 정보도 최신화 (내가 팔로잉한 목록이 반영되도록)
+			session.setAttribute("loginUser", memberService.getMember(loginUser.getId()));
 		}
 		redirect(request, response, "/member?action=mypage&id=" + targetId);
 	}
@@ -125,8 +127,10 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		
 		if (loginUser != null && targetId != null) {
 			memberService.removeFollower(loginUser.getId(), targetId);
+			// 내 세션 정보도 최신화
+			session.setAttribute("loginUser", memberService.getMember(loginUser.getId()));
 		}
-		redirect(request, response, "/member?action=mypage");
+		redirect(request, response, "/member?action=mypage&id=" + targetId);
 	}
 
 	private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -83,10 +83,10 @@
 
   <%-- 로그인 상태에 따라 표시 --%>
   <c:choose>
-    <c:when test="${not empty sessionScope.loginMember}">
-      <span class="nav-user">
-        <i class="fa-regular fa-user"></i> ${sessionScope.loginMember.name}님
-      </span>
+    <c:when test="${not empty sessionScope.loginUser}">
+      <a href="${root}/member?action=mypage" class="nav-link-item">
+        <i class="fa-regular fa-user"></i> ${sessionScope.loginUser.name}님 (마이페이지)
+      </a>
       <div class="nav-divider"></div>
       <a href="${root}/member?action=logout" class="nav-link-item">
         <i class="fa-solid fa-right-from-bracket"></i> 로그아웃

@@ -18,6 +18,7 @@ public class MemberDto implements Serializable {
 	private String disease;
 	private String image;
 	private List<String> followers = new ArrayList<>();
+	private List<String> following = new ArrayList<>();
 	
 	public MemberDto() {
 		super();
@@ -117,11 +118,19 @@ public class MemberDto implements Serializable {
 		this.followers = followers;
 	}
 
+	public List<String> getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(List<String> following) {
+		this.following = following;
+	}
+
 	@Override
 	public String toString() {
 		return "MemberDto [id=" + id + ", password=" + password + ", name=" + name + ", birthDate=" + birthDate
 				+ ", gender=" + gender + ", height=" + height + ", weight=" + weight + ", disease=" + disease
-				+ ", image=" + image + ", followers=" + followers + "]";
+				+ ", image=" + image + ", followers=" + followers + ", following=" + following + "]";
 	}
 	
 }

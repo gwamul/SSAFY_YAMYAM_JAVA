@@ -218,9 +218,18 @@
     <a href="${root}/chat" class="pill">
       <i class="fa-solid fa-robot"></i> AI 영양사
     </a>
-    <a href="${root}/member?action=loginForm" class="pill">
-      <i class="fa-regular fa-user"></i> 마이페이지
-    </a>
+    <c:choose>
+      <c:when test="${not empty sessionScope.loginUser}">
+        <a href="${root}/member?action=mypage" class="pill">
+          <i class="fa-regular fa-user"></i> 마이페이지
+        </a>
+      </c:when>
+      <c:otherwise>
+        <a href="${root}/member?action=loginForm" class="pill">
+          <i class="fa-regular fa-user"></i> 마이페이지
+        </a>
+      </c:otherwise>
+    </c:choose>
   </div>
 </div>
 

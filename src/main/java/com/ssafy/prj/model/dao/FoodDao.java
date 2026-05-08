@@ -2,6 +2,7 @@ package com.ssafy.prj.model.dao;
 
 
 
+import java.sql.SQLException;
 import java.util.List;
 
 import com.ssafy.prj.model.dto.FoodDto;
@@ -14,15 +15,11 @@ import com.ssafy.prj.model.dto.FoodDto;
  */
 public interface FoodDao {
 
-    /**
-     * 이름에 keyword 가 포함된 음식 목록을 반환합니다.
-     * @param keyword 검색어 (대소문자 무관)
-     * @param limit   최대 반환 개수
-     */
-    List<FoodDto> searchByName(String keyword, int limit);
+    List<FoodDto> selectAll() throws SQLException;
+    
+    FoodDto selectOne(String food_code) throws SQLException;
 
-    /**
-     * 음식 코드로 단일 항목을 조회합니다.
-     */
-    FoodDto findByCode(String foodCode);
+    List<FoodDto> searchByName(String keyword, int limit) throws SQLException;
+
+    FoodDto findByCode(String foodCode) throws SQLException;
 }

@@ -28,11 +28,11 @@
                 <header class="content-header mb-5">
                     <div id="pageTitle">
                         <span class="header-eyebrow" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
-                            ${targetUser.id eq loginUser.id ? 'My Profile' : 'User Profile'}
+                            ${targetUser.userId eq loginUser.userId ? 'My Profile' : 'User Profile'}
                         </span>
                         <h1 class="header-title" style="font-size: 2.5rem; font-weight: 800;">${targetUser.name}님의 프로필</h1>
                     </div>
-                    <p id="pageSubtitle" class="text-muted mt-2">@${targetUser.id} 사용자의 상세 정보와 건강 데이터를 확인하세요.</p>
+                    <p id="pageSubtitle" class="text-muted mt-2">@${targetUser.userId} 사용자의 상세 정보와 건강 데이터를 확인하세요.</p>
                 </header>
 
                 <!-- 마이페이지 탭 메뉴 -->
@@ -44,8 +44,8 @@
                 <div class="auth-section">
                     <!-- 1. 프로필 탭 내용 -->
                     <div id="profileTab" class="tab-content">
-                        <div class="profile-main-card ${targetUser.id ne loginUser.id ? 'others-profile' : ''} p-5 bg-white rounded-5 shadow-sm border">
-                            <c:if test="${targetUser.id ne loginUser.id}">
+                        <div class="profile-main-card ${targetUser.userId ne loginUser.userId ? 'others-profile' : ''} p-5 bg-white rounded-5 shadow-sm border">
+                            <c:if test="${targetUser.userId ne loginUser.userId}">
                                 <div class="others-badge mb-3 d-inline-block bg-primary text-white px-3 py-1 rounded-pill small fw-bold">타인 프로필</div>
                                 <a href="${pageContext.request.contextPath}/member?action=mypage" class="btn-back-to-my d-block mb-4 text-decoration-none text-primary fw-bold">← 내 프로필로 돌아가기</a>
                             </c:if>
@@ -56,11 +56,11 @@
                                 </div>
                                 <div class="profile-title-info">
                                     <h2 class="mb-1" style="font-weight: 800;">${targetUser.name}</h2>
-                                    <span class="user-id-tag text-muted">@${targetUser.id}</span>
+                                    <span class="user-id-tag text-muted">@${targetUser.userId}</span>
                                 </div>
                                 <div class="ms-auto d-flex gap-2">
                                     <c:choose>
-                                        <c:when test="${targetUser.id eq loginUser.id}">
+                                        <c:when test="${targetUser.userId eq loginUser.userId}">
                                             <a href="${pageContext.request.contextPath}/member?action=editForm" class="btn btn-outline-primary rounded-pill px-4 fw-bold">정보 수정</a>
                                             <a href="${pageContext.request.contextPath}/member?action=logout" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">로그아웃</a>
                                         </c:when>
@@ -68,14 +68,14 @@
                                             <!-- 팔로우 버튼 로직 -->
                                             <c:set var="isFollowing" value="false" />
                                             <c:forEach var="f" items="${loginUser.followers}">
-                                                <c:if test="${f eq targetUser.id}"><c:set var="isFollowing" value="true" /></c:if>
+                                                <c:if test="${f eq targetUser.userId}"><c:set var="isFollowing" value="true" /></c:if>
                                             </c:forEach>
                                             <c:choose>
                                                 <c:when test="${isFollowing}">
-                                                    <a href="${pageContext.request.contextPath}/member?action=removeFollower&targetId=${targetUser.id}" class="btn btn-outline-danger rounded-pill px-4 fw-bold">언팔로우</a>
+                                                    <a href="${pageContext.request.contextPath}/member?action=removeFollower&targetId=${targetUser.userId}" class="btn btn-outline-danger rounded-pill px-4 fw-bold">언팔로우</a>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a href="${pageContext.request.contextPath}/member?action=addFollower&targetId=${targetUser.id}" class="btn btn-primary rounded-pill px-4 fw-bold">팔로우</a>
+                                                    <a href="${pageContext.request.contextPath}/member?action=addFollower&targetId=${targetUser.userId}" class="btn btn-primary rounded-pill px-4 fw-bold">팔로우</a>
                                                 </c:otherwise>
                                             </c:choose>
                                         </c:otherwise>
@@ -139,7 +139,7 @@
                                 </div>
                             </div>
 
-                            <c:if test="${targetUser.id eq loginUser.id}">
+                            <c:if test="${targetUser.userId eq loginUser.userId}">
                                 <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center opacity-75">
                                     <div>
                                         <h6 class="text-muted mb-1 fw-bold">계정 관리</h6>

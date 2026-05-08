@@ -49,7 +49,7 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		MemberDto loginUser = (MemberDto) session.getAttribute("loginUser");
 		
 		if (targetId == null && loginUser != null) {
-			targetId = loginUser.getId();
+			targetId = loginUser.getUserId();
 		}
 		
 		if (targetId == null) {
@@ -101,7 +101,7 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		HttpSession session = request.getSession();
 		MemberDto loginUser = (MemberDto) session.getAttribute("loginUser");
 		if (loginUser != null) {
-			memberService.removeMember(loginUser.getId());
+			memberService.removeMember(loginUser.getUserId());
 			session.invalidate();
 		}
 		redirect(request, response, "/main");
@@ -112,10 +112,10 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		HttpSession session = request.getSession();
 		MemberDto loginUser = (MemberDto) session.getAttribute("loginUser");
 		
-		if (loginUser != null && targetId != null && !loginUser.getId().equals(targetId)) {
-			memberService.addFollower(loginUser.getId(), targetId);
+		if (loginUser != null && targetId != null && !loginUser.getUserId().equals(targetId)) {
+			memberService.addFollower(loginUser.getUserId(), targetId);
 			// 내 세션 정보도 최신화 (내가 팔로잉한 목록이 반영되도록)
-			session.setAttribute("loginUser", memberService.getMember(loginUser.getId()));
+			session.setAttribute("loginUser", memberService.getMember(loginUser.getUserId()));
 		}
 		redirect(request, response, "/member?action=mypage&id=" + targetId);
 	}
@@ -126,9 +126,9 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		MemberDto loginUser = (MemberDto) session.getAttribute("loginUser");
 		
 		if (loginUser != null && targetId != null) {
-			memberService.removeFollower(loginUser.getId(), targetId);
+			memberService.removeFollower(loginUser.getUserId(), targetId);
 			// 내 세션 정보도 최신화
-			session.setAttribute("loginUser", memberService.getMember(loginUser.getId()));
+			session.setAttribute("loginUser", memberService.getMember(loginUser.getUserId()));
 		}
 		redirect(request, response, "/member?action=mypage&id=" + targetId);
 	}
@@ -145,7 +145,7 @@ public class MemberController extends HttpServlet implements ControllerHelper {
 		String saveId = request.getParameter("saveId");		
 		
 		MemberDto member = new MemberDto();
-		member.setId(id);
+		member.setUserId(id);
 		member.setPassword(password);
 		MemberDto loginUser = memberService.login(member);
 		if (loginUser == null) {

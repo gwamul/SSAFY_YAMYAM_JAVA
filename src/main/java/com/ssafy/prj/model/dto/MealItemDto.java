@@ -2,11 +2,6 @@ package com.ssafy.prj.model.dto;
 
 import java.io.Serializable;
 
-/**
- * 식단(아침/점심/저녁) 안의 음식 한 항목 DTO.
- *
- * 기존 JS 구조: { name: "국밥", kcal: 137 }
- */
 public class MealItemDto implements Serializable {
 
     private static final long serialVersionUID = 1L;

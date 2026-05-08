@@ -13,6 +13,8 @@ public class ChallengeDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    
+    private String creatorId;
     private int id;
     private String name;
     private String difficulty;      // "easy" | "medium" | "hard"
@@ -33,6 +35,9 @@ public class ChallengeDto implements Serializable {
     }
 
     // ── Getters & Setters ─────────────────────────────────────────
+    
+    public String getCreatorId() { return creatorId; }
+    public void setCreatorId(String creatorId) { this.creatorId = creatorId; }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

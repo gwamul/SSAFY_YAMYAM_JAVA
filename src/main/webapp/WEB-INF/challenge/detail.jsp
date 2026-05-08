@@ -65,9 +65,12 @@
       <input type="hidden" name="id" value="${challenge.id}">
       <button type="submit" class="btn-subscribe">🚀 이 챌린지 도전하기</button>
     </form>
-    <a href="${root}/challenge?action=delete&id=${challenge.id}"
-       class="btn-delete mt-3 d-inline-block"
-       onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+    <c:if test="${not empty sessionScope.loginMember
+             && challenge.creatorId == sessionScope.loginMember.id}">
+	    <a href="${root}/challenge?action=delete&id=${challenge.id}"
+	       class="btn-delete mt-3 d-inline-block"
+	       onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+	</c:if>
   </div>
 
   <%-- 일별 식단 --%>

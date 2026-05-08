@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebFilter("/board")
+@WebFilter({"/board", "/diet"})
 public class SessionFilter extends HttpFilter implements Filter {
 
 	@Override

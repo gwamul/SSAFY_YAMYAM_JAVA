@@ -132,6 +132,7 @@ public class ChallengeDaoFileImpl implements ChallengeDao {
         sb.append(escapeCsv(c.getDifficulty())).append(',');
         sb.append(c.getDuration()).append(',');
         sb.append(c.getTargetCalories()).append(',');
+        sb.append(escapeCsv(c.getCreatorId())).append(',');
         sb.append('"').append(encodeMealPlans(c.getMealPlans())).append('"');
         return sb.toString();
     }
@@ -155,6 +156,7 @@ public class ChallengeDaoFileImpl implements ChallengeDao {
             dto.setDifficulty(unescapeCsv(cols[2]));
             dto.setDuration(Integer.parseInt(cols[3].trim()));
             dto.setTargetCalories(Integer.parseInt(cols[4].trim()));
+            dto.setCreatorId(unescapeCsv(cols[5]));
             dto.setMealPlans(decodeMealPlans(mealPart));
             return dto;
         } catch (Exception e) {
